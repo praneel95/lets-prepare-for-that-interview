@@ -9,7 +9,7 @@
 ![Works with OpenAI or Claude](https://img.shields.io/badge/AI-OpenAI%20or%20Claude-A0671F.svg)
 ![PRs welcome](https://img.shields.io/badge/PRs-welcome-2D6045.svg)
 
-![Interview Coach demo — a question is asked, answered by voice, and scored](assets/demo.gif)
+![Interview Coach demo — a question is asked, answered by voice, and scored](demo.gif)
 
 ---
 
@@ -25,21 +25,21 @@ Everything runs in **one HTML file in your browser**. There is no backend, no tr
 
 **1. A question is generated from your resume and the job, then read aloud.**
 
-![The app showing an interview question with a microphone to answer](assets/screenshot-question.png)
+![The app showing an interview question with a microphone to answer](screenshot-question.png)
 
 **2. You answer out loud — your speech is transcribed live as you talk.**
 
-![The app listening and transcribing a spoken answer in real time](assets/screenshot-answering.png)
+![The app listening and transcribing a spoken answer in real time](screenshot-answering.png)
 
 **3. You get an honest score and specific feedback — not just praise.**
 
-![A scored answer showing 6 out of 10 with what worked and shortcomings](assets/screenshot-score.png)
+![A scored answer showing 6 out of 10 with what worked and shortcomings](screenshot-score.png)
 
 > The demo above scores a **6/10** — on purpose. The feedback is real, so a so-so answer gets a so-so score, with concrete notes on how to push it higher.
 
 **4. And here's the best part — it rewrites your answer into a 10/10 version, using your real background.**
 
-![Your answer restructured, plus a model 10 out of 10 answer built from your own resume](assets/screenshot-model-answer.png)
+![Your answer restructured, plus a model 10 out of 10 answer built from your own resume](screenshot-model-answer.png)
 
 > Two rewrites every time: your own answer cleaned up, and a polished model answer drawn from *your* resume — so you can hear the gap and close it. (A few personal details are blurred in this screenshot.)
 
