@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Interview Coach — AI Spoken Interview Practice (Bring Your Own Key)</title>
+<meta name="description" content="Practice job interviews out loud with an AI coach. It generates questions from your resume and the job description, reads them aloud, listens to your spoken answers, and scores each one with specific feedback. Free, open source, runs entirely in your browser. Works with OpenAI or Claude." />
+<meta name="keywords" content="interview practice, mock interview, AI interview coach, interview preparation, behavioral interview, STAR method, job interview, speech recognition, OpenAI, Claude, Anthropic, BYOK" />
+<meta name="author" content="praneel95" />
+<link rel="canonical" href="https://praneel95.github.io/lets-prepare-for-that-interview/" />
+
+<!-- Open Graph / Facebook / LinkedIn / Slack -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://praneel95.github.io/lets-prepare-for-that-interview/" />
+<meta property="og:title" content="Interview Coach — AI Spoken Interview Practice" />
+<meta property="og:description" content="Rehearse real interview questions out loud and get an honest score on every answer. Bring your own OpenAI or Claude key. Free and open source." />
+<meta property="og:image" content="https://praneel95.github.io/lets-prepare-for-that-interview/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Interview Coach — AI Spoken Interview Practice" />
+<meta name="twitter:description" content="Rehearse real interview questions out loud and get an honest score on every answer. Bring your own OpenAI or Claude key. Free and open source." />
+<meta name="twitter:image" content="https://praneel95.github.io/lets-prepare-for-that-interview/og-image.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:        #F7F4ED;
+    --paper-warm:   #FEFCF7;
+    --paper-dim:    #EFEAE0;
+    --ink:          #1A1815;
+    --ink-soft:     #4A453E;
+    --ink-muted:    #7A746B;
+    --ink-fade:     #A8A199;
+    --rule:         #D8D2C7;
+    --rule-soft:    #E6E0D4;
+    --oxblood:      #7A2E2E;
+    --oxblood-bg:   #F0E2E0;
+    --forest:       #2D6045;
+    --forest-bg:    #E2EDE5;
+    --amber:        #A0671F;
+    --amber-bg:     #F5EAD7;
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans:  "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono:  "Geist Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .stage { max-width: 760px; margin: 0 auto; padding: 60px 32px 100px; }
+
+  .mast { margin-bottom: 56px; }
+  .mast-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+  .mast-title {
+    font-family: var(--serif);
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    font-weight: 400;
+  }
+  .mast-title em { font-style: italic; color: var(--oxblood); }
+  .mast-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 21px;
+    color: var(--ink-soft);
+    max-width: 540px;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .sheet {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 40px 44px;
+    position: relative;
+  }
+  .sheet::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 3px;
+    background: var(--ink);
+  }
+
+  .field { margin-bottom: 28px; }
+  .field-label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+  }
+  .field-num { color: var(--oxblood); margin-right: 8px; }
+  .field-hint {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    margin: 8px 0 0;
+    line-height: 1.5;
+  }
+  .field-hint a {
+    color: var(--oxblood);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 14px 16px;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    resize: vertical;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: var(--paper-warm);
+  }
+  textarea::placeholder { color: var(--ink-fade); }
+
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  input[type="password"]:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: var(--paper-warm);
+  }
+  input::placeholder { color: var(--ink-fade); }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pill:hover { border-color: var(--ink-muted); color: var(--ink); }
+  .pill.active { background: var(--ink); color: var(--paper-warm); border-color: var(--ink); }
+
+  .actions { display: flex; gap: 12px; align-items: center; margin-top: 32px; flex-wrap: wrap; }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 11px 22px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--paper-dim); border-color: var(--ink-muted); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--ink); color: var(--paper-warm); border-color: var(--ink); }
+  .btn-primary:hover { background: var(--oxblood); border-color: var(--oxblood); }
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--ink-muted);
+    padding: 11px 14px;
+  }
+  .btn-ghost:hover { color: var(--ink); background: transparent; }
+  .arrow { font-size: 16px; line-height: 1; }
+  .spacer-r { margin-left: auto; }
+
+  .err {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--oxblood);
+    background: var(--oxblood-bg);
+    color: var(--oxblood);
+    font-size: 13px;
+    border-radius: 0 2px 2px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .meta-right { display: flex; gap: 12px; align-items: baseline; }
+  .style-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-fade);
+  }
+  .engine-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--forest-bg);
+    color: var(--forest);
+  }
+  .engine-badge.fallback { background: var(--amber-bg); color: var(--amber); }
+
+  .q-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin: 8px 0 32px;
+  }
+  .question {
+    font-family: var(--serif);
+    font-size: 26px;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 0;
+    padding-left: 18px;
+    border-left: 2px solid var(--oxblood);
+    font-weight: 400;
+    flex: 1;
+  }
+  .speaker-btn {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    margin-top: 6px;
+  }
+  .speaker-btn:hover { color: var(--ink); border-color: var(--ink-muted); }
+  .speaker-btn.speaking {
+    color: var(--paper-warm);
+    background: var(--oxblood);
+    border-color: var(--oxblood);
+    animation: pulse-soft 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-soft {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(122, 46, 46, 0.35); }
+    50% { box-shadow: 0 0 0 8px rgba(122, 46, 46, 0); }
+  }
+  .speaker-btn svg { width: 16px; height: 16px; }
+
+  .voice-area {
+    padding: 24px 26px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+  .voice-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+  .mic-btn {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+    background: var(--paper-warm);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .mic-btn:hover { background: var(--ink); color: var(--paper-warm); }
+  .mic-btn.recording {
+    background: var(--oxblood);
+    border-color: var(--oxblood);
+    color: var(--paper-warm);
+    animation: pulse-rec 1.6s ease-in-out infinite;
+  }
+  .mic-btn.recording:hover { background: var(--oxblood); }
+  .mic-btn svg { width: 22px; height: 22px; }
+  @keyframes pulse-rec {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(122, 46, 46, 0.45); }
+    50% { box-shadow: 0 0 0 14px rgba(122, 46, 46, 0); }
+  }
+
+  .mic-status {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .mic-status.live { color: var(--oxblood); }
+  .live-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--oxblood);
+    margin-right: 8px;
+    animation: blink 1.2s ease-in-out infinite;
+    vertical-align: 1px;
+  }
+  @keyframes blink { 50% { opacity: 0.25; } }
+
+  .interim {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink-fade);
+    font-style: italic;
+    min-height: 27px;
+  }
+  .transcript {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--ink);
+    min-height: 24px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .transcript:empty { padding-top: 0; margin-top: 0; border-top: none; }
+
+  .voice-unsupported {
+    padding: 12px 16px;
+    border-left: 3px solid var(--amber);
+    background: var(--amber-bg);
+    color: var(--amber);
+    font-size: 13px;
+    border-radius: 0 2px 2px 0;
+    margin-bottom: 16px;
+  }
+
+  .mode-switch {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .mode-switch a {
+    color: var(--oxblood);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .mode-switch a:hover { border-color: var(--oxblood); }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--ink-muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 32px 0;
+    justify-content: center;
+  }
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--rule);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fb-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .fb-score { font-family: var(--serif); font-size: 64px; line-height: 1; font-weight: 400; }
+  .fb-out { font-family: var(--mono); font-size: 13px; color: var(--ink-muted); }
+  .fb-bar-track {
+    height: 4px;
+    background: var(--paper-dim);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 14px 0 24px;
+  }
+  .fb-bar-fill { height: 100%; transition: width 0.6s cubic-bezier(.2,.7,.2,1); }
+  .fb-verdict {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    margin: 0 0 32px;
+  }
+  .fb-section { margin-bottom: 24px; }
+  .fb-section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fb-section-title .marker { width: 6px; height: 6px; border-radius: 50%; }
+  .pos { color: var(--forest); } .pos .marker { background: var(--forest); }
+  .neg { color: var(--amber); }  .neg .marker { background: var(--amber); }
+  .tip { color: var(--oxblood); } .tip .marker { background: var(--oxblood); }
+  .fb-list { margin: 0; padding: 0; list-style: none; }
+  .fb-list li {
+    padding: 8px 0 8px 22px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    border-bottom: 1px solid var(--rule-soft);
+    position: relative;
+  }
+  .fb-list li:last-child { border-bottom: none; }
+  .fb-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 17px;
+    width: 12px;
+    height: 1px;
+    background: var(--ink-fade);
+  }
+  .model-hint {
+    margin-top: 6px;
+    padding: 16px 18px;
+    background: var(--paper);
+    border-left: 2px solid var(--rule);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .structured-answer {
+    margin-top: 6px;
+    padding: 16px 20px;
+    background: var(--paper);
+    border-left: 2px solid var(--rule);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    white-space: pre-wrap;
+  }
+
+  .ideal-answer {
+    margin-top: 6px;
+    padding: 20px 24px;
+    background: var(--forest-bg);
+    border-left: 3px solid var(--forest);
+    border-radius: 0 2px 2px 0;
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-bottom: 36px;
+  }
+  .stat { background: var(--paper-warm); padding: 24px 20px; text-align: center; }
+  .stat-value { font-family: var(--serif); font-size: 44px; line-height: 1; margin-bottom: 8px; }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .history-item { padding: 16px 0; border-bottom: 1px solid var(--rule-soft); }
+  .history-item:last-child { border-bottom: none; }
+  .history-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+  .history-q { font-family: var(--serif); font-size: 16px; line-height: 1.4; color: var(--ink); flex: 1; }
+  .history-score { font-family: var(--mono); font-size: 13px; font-weight: 500; white-space: nowrap; }
+
+  .hide { display: none !important; }
+  .fade-in { animation: fade 0.4s ease-out; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .stage { padding: 40px 20px 80px; }
+    .mast-title { font-size: 44px; }
+    .mast-sub { font-size: 17px; }
+    .sheet { padding: 28px 22px; }
+    .question { font-size: 21px; }
+    .fb-score { font-size: 48px; }
+    .stat-value { font-size: 32px; }
+    .voice-area { padding: 20px 18px; }
+    .mic-btn { width: 52px; height: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <header class="mast">
+    <div class="mast-eyebrow">No. 01 — Practice session</div>
+    <h1 class="mast-title">The <em>spoken</em><br />interview.</h1>
+    <p class="mast-sub">Paste your resume, the job description, and your API keys. Each question is read aloud — you answer by speaking. Honest score and specific critique on every answer.</p>
+  </header>
+
+  <section id="setup" class="sheet fade-in">
+    <div class="field">
+      <label class="field-label"><span class="field-num">01</span>Your resume</label>
+      <textarea id="resume" placeholder="Paste the full text of your resume — experience, projects, skills, education. The more specific, the sharper the questions."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label"><span class="field-num">02</span>Job description</label>
+      <textarea id="jd" placeholder="Paste the job description — title, responsibilities, required skills."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label"><span class="field-num">03</span>OpenAI or Claude API key</label>
+      <input type="password" id="llm-key" placeholder="sk-... (OpenAI) or sk-ant-... (Claude)" autocomplete="off" spellcheck="false" />
+      <p class="field-hint">Needed to generate questions and score answers. Paste <strong>either</strong> an OpenAI key (<a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>) <strong>or</strong> an Anthropic Claude key (<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>). The app detects which one you gave. Make sure the account has credit. Stored only in this browser tab.</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label"><span class="field-num">04</span>Deepgram API key <span style="color: var(--ink-fade); text-transform: none; letter-spacing: 0;">(optional)</span></label>
+      <input type="password" id="deepgram-key" placeholder="Paste your Deepgram API key for better speech recognition" autocomplete="off" spellcheck="false" />
+      <p class="field-hint">Better quality than the browser default. Leave blank to use built-in speech recognition (Chrome/Edge/Safari only).</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label"><span class="field-num">05</span>Style</label>
+      <div class="pills" id="style-pills">
+        <button class="pill active" data-style="mixed">Mixed</button>
+        <button class="pill" data-style="behavioral">Behavioral</button>
+        <button class="pill" data-style="technical">Technical</button>
+        <button class="pill" data-style="situational">Situational</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label"><span class="field-num">06</span>Difficulty</label>
+      <div class="pills" id="diff-pills">
+        <button class="pill" data-diff="easy">Warm-up</button>
+        <button class="pill active" data-diff="medium">Realistic</button>
+        <button class="pill" data-diff="hard">Tough panel</button>
+      </div>
+    </div>
+
+    <div id="setup-err" class="err hide"></div>
+
+    <div class="actions">
+      <button id="start" class="btn btn-primary">Begin <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+  <section id="interview" class="sheet hide">
+    <div class="meta-row">
+      <span class="q-num" id="counter">Question 01</span>
+      <div class="meta-right">
+        <span class="engine-badge" id="engine-badge">Deepgram</span>
+        <span class="style-tag" id="style-tag"></span>
+      </div>
+    </div>
+
+    <div id="loading-q" class="loading"><div class="spinner"></div><span>Composing your question</span></div>
+
+    <div id="q-block" class="hide">
+      <div class="q-row">
+        <p class="question" id="question"></p>
+        <button id="speak-q" class="speaker-btn" title="Read question aloud" aria-label="Read question aloud">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        </button>
+      </div>
+
+      <div id="answer-area">
+        <div id="voice-mode" class="voice-area">
+          <div id="voice-unsupported" class="voice-unsupported hide"></div>
+          <div class="voice-controls">
+            <button id="mic-btn" class="mic-btn" aria-label="Start recording">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+            </button>
+            <div class="mic-status" id="mic-status">Tap mic and start speaking</div>
+          </div>
+          <div class="interim" id="interim"></div>
+          <div class="transcript" id="transcript"></div>
+        </div>
+
+        <div id="type-mode" class="field hide" style="margin-bottom: 0;">
+          <label class="field-label">Your answer</label>
+          <textarea id="answer" placeholder="Type out your answer."></textarea>
+        </div>
+
+        <div class="mode-switch">
+          <a id="switch-mode">Type your answer instead</a>
+        </div>
+
+        <div id="answer-err" class="err hide"></div>
+
+        <div class="actions">
+          <button id="submit" class="btn btn-primary">Submit answer <span class="arrow">→</span></button>
+          <button id="skip" class="btn">Skip</button>
+          <button id="end" class="btn btn-ghost spacer-r">End session</button>
+        </div>
+      </div>
+
+      <div id="loading-eval" class="loading hide"><div class="spinner"></div><span>Scoring your answer</span></div>
+      <div id="feedback" class="hide fade-in"></div>
+    </div>
+  </section>
+
+  <section id="summary" class="sheet hide fade-in">
+    <div class="meta-row">
+      <span class="q-num">Session summary</span>
+      <span class="style-tag" id="summary-style"></span>
+    </div>
+    <div id="summary-body"></div>
+    <div class="actions">
+      <button id="restart" class="btn btn-primary">Start over <span class="arrow">→</span></button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const show = (id, on = true) => $(id).classList.toggle('hide', !on);
+
+  const OPENAI_MODEL = 'gpt-4o';
+  const ANTHROPIC_MODEL = 'claude-sonnet-4-6';
+  const ANTHROPIC_VERSION = '2023-06-01';
+
+  // Detect which provider a pasted key belongs to.
+  // OpenAI keys start with "sk-" (incl. "sk-proj-").
+  // Anthropic keys start with "sk-ant-".
+  function detectProvider(key) {
+    if (!key) return null;
+    if (key.startsWith('sk-ant-')) return 'anthropic';
+    if (key.startsWith('sk-')) return 'openai';
+    return null;
+  }
+
+  const state = {
+    resume: '', jd: '',
+    llmKey: '', provider: null, deepgramKey: '',
+    style: 'mixed', diff: 'medium',
+    history: [], currentQ: '', qNum: 0,
+    engine: 'browser',
+  };
+
+  document.querySelectorAll('#style-pills .pill').forEach((b) => {
+    b.onclick = () => {
+      document.querySelectorAll('#style-pills .pill').forEach((x) => x.classList.remove('active'));
+      b.classList.add('active');
+      state.style = b.dataset.style;
+    };
+  });
+  document.querySelectorAll('#diff-pills .pill').forEach((b) => {
+    b.onclick = () => {
+      document.querySelectorAll('#diff-pills .pill').forEach((x) => x.classList.remove('active'));
+      b.classList.add('active');
+      state.diff = b.dataset.diff;
+    };
+  });
+
+  // ============ VOICE STATE ============
+  let isRecording = false;
+  let finalTranscript = '';
+  let mode = 'voice';
+
+  function updateMicUI(recording) {
+    if (recording) {
+      $('mic-btn').classList.add('recording');
+      $('mic-status').classList.add('live');
+      $('mic-status').innerHTML = '<span class="live-dot"></span>Listening — tap to stop';
+    } else {
+      $('mic-btn').classList.remove('recording');
+      $('mic-status').classList.remove('live');
+      $('mic-status').textContent = finalTranscript.trim()
+        ? 'Tap mic to add more, or submit below'
+        : 'Tap mic and start speaking';
+    }
+  }
+
+  // ============ DEEPGRAM ============
+  let dgSocket = null;
+  let dgMediaStream = null;
+  let dgMediaRecorder = null;
+  let dgKeepAlive = null;
+
+  async function startDeepgram() {
+    dgMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const params = new URLSearchParams({
+      model: 'nova-3',
+      interim_results: 'true',
+      smart_format: 'true',
+      punctuate: 'true',
+      language: 'en-US',
+    });
+    return new Promise((resolve, reject) => {
+      try {
+        dgSocket = new WebSocket(`wss://api.deepgram.com/v1/listen?${params}`, ['token', state.deepgramKey]);
+      } catch (e) {
+        reject(new Error('Failed to open Deepgram connection: ' + e.message));
+        return;
+      }
+      let opened = false;
+
+      dgSocket.onopen = () => {
+        opened = true;
+        let mimeType = '';
+        const tryTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+        for (const t of tryTypes) {
+          if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(t)) { mimeType = t; break; }
+        }
+        try {
+          dgMediaRecorder = mimeType
+            ? new MediaRecorder(dgMediaStream, { mimeType })
+            : new MediaRecorder(dgMediaStream);
+        } catch (e) {
+          reject(new Error('MediaRecorder failed: ' + e.message));
+          return;
+        }
+        dgMediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0 && dgSocket && dgSocket.readyState === 1) dgSocket.send(event.data);
+        };
+        dgMediaRecorder.start(250);
+        dgKeepAlive = setInterval(() => {
+          if (dgSocket && dgSocket.readyState === 1) {
+            try { dgSocket.send(JSON.stringify({ type: 'KeepAlive' })); } catch (e) {}
+          }
+        }, 8000);
+        resolve();
+      };
+
+      dgSocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'Results' || data.channel) {
+            const alt = data.channel && data.channel.alternatives && data.channel.alternatives[0];
+            const transcript = alt ? alt.transcript : '';
+            if (!transcript) return;
+            if (data.is_final) {
+              finalTranscript += transcript + ' ';
+              $('transcript').textContent = finalTranscript;
+              $('interim').textContent = '';
+            } else {
+              $('interim').textContent = transcript;
+            }
+          }
+        } catch (e) {}
+      };
+
+      dgSocket.onerror = () => {
+        if (!opened) reject(new Error("Couldn't connect to Deepgram. Check your API key and account credit."));
+      };
+      dgSocket.onclose = (event) => {
+        if (!opened) {
+          if (event.code === 1006 || event.code === 1008 || event.code === 4001 || event.code === 4008) {
+            reject(new Error(`Deepgram rejected the connection (code ${event.code}). Most common cause: invalid or expired API key.`));
+          } else {
+            reject(new Error(`Deepgram connection closed before opening (code ${event.code}).`));
+          }
+        }
+      };
+    });
+  }
+
+  function stopDeepgram() {
+    if (dgKeepAlive) { clearInterval(dgKeepAlive); dgKeepAlive = null; }
+    if (dgMediaRecorder && dgMediaRecorder.state !== 'inactive') {
+      try { dgMediaRecorder.stop(); } catch (e) {}
+    }
+    dgMediaRecorder = null;
+    if (dgMediaStream) {
+      dgMediaStream.getTracks().forEach((t) => { try { t.stop(); } catch (e) {} });
+      dgMediaStream = null;
+    }
+    if (dgSocket) {
+      if (dgSocket.readyState === 1) {
+        try { dgSocket.send(JSON.stringify({ type: 'CloseStream' })); } catch (e) {}
+      }
+      const sock = dgSocket;
+      dgSocket = null;
+      setTimeout(() => { try { sock.close(); } catch (e) {} }, 400);
+    }
+  }
+
+  // ============ BROWSER SPEECH ============
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let browserRecognition = null;
+
+  function initBrowserSpeech() {
+    if (!SpeechRec) return false;
+    browserRecognition = new SpeechRec();
+    browserRecognition.continuous = true;
+    browserRecognition.interimResults = true;
+    browserRecognition.lang = 'en-US';
+    browserRecognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += t + ' ';
+        else interim += t;
+      }
+      $('transcript').textContent = finalTranscript;
+      $('interim').textContent = interim;
+    };
+    browserRecognition.onerror = (event) => {
+      if (event.error === 'no-speech' || event.error === 'aborted') return;
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setError('answer-err', "Microphone access denied. Allow it in your browser, or use 'Type your answer instead' below.");
+      } else {
+        setError('answer-err', "Voice error: " + event.error);
+      }
+      stopRecording();
+    };
+    browserRecognition.onend = () => {
+      if (isRecording && state.engine === 'browser') {
+        try { browserRecognition.start(); } catch (e) {}
+      } else { $('interim').textContent = ''; }
+    };
+    return true;
+  }
+
+  async function startRecording() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setError('answer-err', '');
+    try {
+      if (state.engine === 'deepgram') {
+        isRecording = true;
+        updateMicUI(true);
+        $('mic-status').innerHTML = '<span class="live-dot"></span>Connecting to Deepgram...';
+        await startDeepgram();
+        $('mic-status').innerHTML = '<span class="live-dot"></span>Listening — tap to stop';
+      } else if (browserRecognition) {
+        browserRecognition.start();
+        isRecording = true;
+        updateMicUI(true);
+      } else {
+        throw new Error("No speech recognition available. Add a Deepgram API key, or use 'Type your answer instead' below.");
+      }
+    } catch (e) {
+      isRecording = false;
+      updateMicUI(false);
+      setError('answer-err', e.message);
+      if (state.engine === 'deepgram') stopDeepgram();
+    }
+  }
+
+  function stopRecording() {
+    isRecording = false;
+    if (state.engine === 'deepgram') stopDeepgram();
+    else if (browserRecognition) { try { browserRecognition.stop(); } catch (e) {} }
+    updateMicUI(false);
+  }
+
+  function resetAnswer() {
+    if (isRecording) stopRecording();
+    finalTranscript = '';
+    $('transcript').textContent = '';
+    $('interim').textContent = '';
+    $('answer').value = '';
+    $('mic-status').classList.remove('live');
+    $('mic-status').textContent = 'Tap mic and start speaking';
+  }
+
+  function getAnswerText() {
+    if (mode === 'voice') return finalTranscript.trim();
+    return $('answer').value.trim();
+  }
+
+  // ============ TTS ============
+  const ttsAvailable = 'speechSynthesis' in window;
+  function speakText(text) {
+    if (!ttsAvailable || !text) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.98;
+    u.pitch = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find((v) =>
+      /Google US English|Samantha|Daniel|Karen|Microsoft Aria|Microsoft Jenny/i.test(v.name)
+    );
+    if (preferred) u.voice = preferred;
+    const btn = $('speak-q');
+    btn.classList.add('speaking');
+    u.onend = () => btn.classList.remove('speaking');
+    u.onerror = () => btn.classList.remove('speaking');
+    window.speechSynthesis.speak(u);
+  }
+  if (ttsAvailable && window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => {};
+  }
+
+  function toggleMode(newMode) {
+    mode = newMode;
+    if (newMode === 'voice') {
+      show('voice-mode', true);
+      show('type-mode', false);
+      $('switch-mode').textContent = 'Type your answer instead';
+    } else {
+      show('voice-mode', false);
+      show('type-mode', true);
+      $('switch-mode').textContent = 'Use voice instead';
+      if (isRecording) stopRecording();
+    }
+  }
+
+  initBrowserSpeech();
+
+  $('mic-btn').onclick = () => { if (isRecording) stopRecording(); else startRecording(); };
+  $('speak-q').onclick = () => speakText(state.currentQ);
+  $('switch-mode').onclick = (e) => { e.preventDefault(); toggleMode(mode === 'voice' ? 'type' : 'voice'); };
+
+  // ============ LLM API (OpenAI + Anthropic) ============
+  // Single entry point. Routes to the right provider based on the pasted key.
+  async function callLLM(userMessage, systemPrompt, maxTokens = 1200, jsonMode = false) {
+    if (state.provider === 'anthropic') {
+      return callAnthropic(userMessage, systemPrompt, maxTokens, jsonMode);
+    }
+    return callOpenAI(userMessage, systemPrompt, maxTokens, jsonMode);
+  }
+
+  async function callOpenAI(userMessage, systemPrompt, maxTokens, jsonMode) {
+    const body = {
+      model: OPENAI_MODEL,
+      max_tokens: maxTokens,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.7,
+    };
+    if (jsonMode) body.response_format = { type: 'json_object' };
+
+    let res;
+    try {
+      res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + state.llmKey,
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      throw new Error("Network error reaching OpenAI. Check your internet connection. If the problem persists, open DevTools (F12) > Network to see the underlying error.");
+    }
+    if (!res.ok) {
+      let bodyText = '';
+      try { bodyText = await res.text(); } catch (e) {}
+      let detail = bodyText.slice(0, 300);
+      try {
+        const j = JSON.parse(bodyText);
+        if (j && j.error && j.error.message) detail = j.error.message;
+      } catch (e) {}
+      throw new Error('OpenAI API ' + res.status + ': ' + detail);
+    }
+    const data = await res.json();
+    if (!data || !data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Unexpected OpenAI response shape');
+    }
+    return (data.choices[0].message.content || '').trim();
+  }
+
+  async function callAnthropic(userMessage, systemPrompt, maxTokens, jsonMode) {
+    // Anthropic takes the system prompt as a top-level field, not a message.
+    // There is no native JSON mode, so when jsonMode is on we nudge the model
+    // by prefilling the assistant turn with "{" — it then continues valid JSON.
+    const messages = [{ role: 'user', content: userMessage }];
+    if (jsonMode) messages.push({ role: 'assistant', content: '{' });
+
+    const body = {
+      model: ANTHROPIC_MODEL,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages: messages,
+      temperature: 0.7,
+    };
+
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': state.llmKey,
+          'anthropic-version': ANTHROPIC_VERSION,
+          // Required to allow calling Anthropic directly from a browser.
+          // Note: this exposes your key to this page. BYOK-in-browser tradeoff.
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      throw new Error("Network error reaching Anthropic. Check your internet connection. If the problem persists, open DevTools (F12) > Network to see the underlying error.");
+    }
+    if (!res.ok) {
+      let bodyText = '';
+      try { bodyText = await res.text(); } catch (e) {}
+      let detail = bodyText.slice(0, 300);
+      try {
+        const j = JSON.parse(bodyText);
+        if (j && j.error && j.error.message) detail = j.error.message;
+      } catch (e) {}
+      throw new Error('Anthropic API ' + res.status + ': ' + detail);
+    }
+    const data = await res.json();
+    if (!data || !Array.isArray(data.content) || !data.content.length) {
+      throw new Error('Unexpected Anthropic response shape');
+    }
+    const text = data.content
+      .filter((b) => b.type === 'text')
+      .map((b) => b.text)
+      .join('')
+      .trim();
+    // Put back the "{" we prefilled so the JSON parses cleanly.
+    return jsonMode ? '{' + text : text;
+  }
+
+  function extractJson(text) {
+    let t = text.trim();
+    t = t.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+    if (!t.startsWith('{')) {
+      const first = t.indexOf('{');
+      const last = t.lastIndexOf('}');
+      if (first >= 0 && last > first) t = t.slice(first, last + 1);
+    }
+    return JSON.parse(t);
+  }
+
+  function basePrompt() {
+    return `You are a senior hiring manager and interview coach. You have the candidate's resume and the target job description below.
+
+RESUME:
+${state.resume}
+
+JOB DESCRIPTION:
+${state.jd}
+
+INTERVIEW STYLE: ${state.style}
+DIFFICULTY: ${state.diff}`;
+  }
+
+  async function nextQuestion() {
+    setError('answer-err', '');
+    show('q-block', false);
+    show('loading-q', true);
+    show('feedback', false);
+    show('answer-area', true);
+
+    const prev = state.history
+      .map((h, i) => `Q${i + 1}: ${h.question}\nA${i + 1}: ${h.answer}`)
+      .join('\n\n') || '(none yet)';
+
+    const questionNum = state.qNum + 1;
+    const styleGuide = state.style === 'behavioral'
+      ? 'After the opener, ask ONLY behavioral/STAR-format questions ("Tell me about a time when...", "Describe a situation where...", "What was the most challenging X you handled?").'
+      : state.style === 'technical'
+      ? 'After the opener, focus on technical depth — frameworks, tools, hands-on skills, system design, and decision-making specific to the role.'
+      : state.style === 'situational'
+      ? 'After the opener, focus on hypothetical scenarios ("What would you do if...", "How would you approach...", "Imagine you discovered...").'
+      : 'Mix question types freely after the opener — behavioral, technical, and situational in whatever order fits the arc.';
+
+    const diffGuide = state.diff === 'easy'
+      ? 'Friendly, warm tone. Stick to comfortable territory and give the candidate room to shine.'
+      : state.diff === 'medium'
+      ? 'Realistic interview tone. Probe naturally, follow up on specifics, but stay professional.'
+      : 'Tough-panel tone. Push back on claims, surface trade-offs, probe weaknesses and gaps in the resume vs. the JD.';
+
+    const sys = basePrompt() + `
+
+You are conducting a real interview, not a coaching drill. Real interviews follow a natural arc — they don't open with sharp probes.
+
+THIS IS QUESTION ${questionNum} OF THE SESSION.
+
+ARC:
+- Q1: Open with a classic warm-up. Pick whichever fits best: "Tell me about yourself", "Walk me through your background and what drew you to this kind of work", or "What interests you about this role?". Warm but professional.
+- Q2–4: Behavioral and experience-based questions, anchored to specifics on their resume ("Tell me about a time when...", "Describe a project where you...", "What was the hardest X you've handled?").
+- Q5–7: Role-specific questions probing depth — skills, frameworks, decisions, scenarios the JD demands.
+- Q8+: Deeper probing — gaps between resume and JD, weaknesses, tough hypotheticals, things they brushed past in earlier answers.
+
+STYLE (${state.style}): ${styleGuide}
+
+DIFFICULTY (${state.diff}): ${diffGuide}
+
+Already asked in this session:
+${prev}
+
+Do not repeat themes from earlier questions. Output ONLY the question itself, 1–3 sentences, no preamble, no numbering, no markdown. Write naturally — it will be read aloud.`;
+
+    try {
+      const q = await callLLM('Ask the next interview question now.', sys, 400, false);
+      state.currentQ = q.replace(/^["']|["']$/g, '').trim();
+      state.qNum += 1;
+      $('counter').textContent = 'Question ' + String(state.qNum).padStart(2, '0');
+      $('style-tag').textContent = state.style + ' · ' + state.diff;
+      $('question').textContent = state.currentQ;
+      resetAnswer();
+      show('loading-q', false);
+      show('q-block', true);
+      if (mode === 'voice') setTimeout(() => speakText(state.currentQ), 250);
+    } catch (e) {
+      show('loading-q', false);
+      show('q-block', true);
+      setError('answer-err', "Couldn't generate a question.\n" + e.message);
+    }
+  }
+
+  async function evaluateAnswer(answer) {
+    setError('answer-err', '');
+    if (isRecording) stopRecording();
+    show('answer-area', false);
+    show('loading-eval', true);
+
+    const sys = basePrompt() + `
+
+You are evaluating a spoken, auto-transcribed answer. Minor transcription errors and filler words ("um", "like", "you know") are normal — judge the substance, not surface polish.
+
+Be specific, fair, and concrete — reference real details from their resume and the JD where relevant.
+
+Return ONLY a JSON object with this exact shape:
+
+{
+  "score": <integer 1-10>,
+  "verdict": "<one-sentence overall judgement>",
+  "strengths": ["<specific strength>", "<specific strength>"],
+  "shortcomings": ["<specific weakness or gap>", "<specific weakness or gap>"],
+  "improvements": ["<concrete suggestion>", "<concrete suggestion>"],
+  "structured_answer": "<the candidate's actual answer, rewritten in their voice — same content and examples, but with filler words removed and organized into a clear structure (STAR format for behavioral questions, logical flow for technical). Keep it roughly the same length as their original. First person. Do not invent details they didn't say — just clean up what they actually said.>",
+  "ideal_answer": "<a full polished sample answer that would score 10/10 for THIS question from THIS candidate (using specifics from their resume) for THIS role. Write it as the candidate would say it aloud — first person, natural spoken cadence, 5–8 sentences. Include concrete specifics: numbers, frameworks, named outcomes, and references drawn from the candidate's actual resume. This is the gold standard for them to aspire to.>"
+}
+
+Rules:
+- 2 to 4 items each in strengths, shortcomings, improvements.
+- Be honest. A vague, generic, or short answer scores 3–5, not 7.
+- Cite specifics (numbers, frameworks, JD requirements, resume bullets) rather than platitudes.
+- If the answer is empty or off-topic, score 1–2 and say so plainly.
+- The structured_answer must use the candidate's actual content — do not invent details they didn't say.
+- The ideal_answer must reference the candidate's real resume — pull in their actual companies, projects, skills, or numbers where possible. Don't fabricate credentials.`;
+
+    const userMsg = `Question: ${state.currentQ}\n\nCandidate's spoken answer (transcribed): ${answer}`;
+
+    try {
+      const raw = await callLLM(userMsg, sys, 2500, true);
+      const ev = extractJson(raw);
+      ev.score = Math.max(1, Math.min(10, Math.round(Number(ev.score) || 0)));
+      ev.strengths = Array.isArray(ev.strengths) ? ev.strengths : [];
+      ev.shortcomings = Array.isArray(ev.shortcomings) ? ev.shortcomings : [];
+      ev.improvements = Array.isArray(ev.improvements) ? ev.improvements : [];
+      state.history.push({ question: state.currentQ, answer, ...ev });
+      renderFeedback(ev);
+      show('loading-eval', false);
+    } catch (e) {
+      show('loading-eval', false);
+      show('answer-area', true);
+      setError('answer-err', "Couldn't score that answer.\n" + e.message);
+    }
+  }
+
+  function scoreColors(s) {
+    if (s >= 8) return { fill: 'var(--forest)', text: 'var(--forest)' };
+    if (s >= 5) return { fill: 'var(--amber)', text: 'var(--amber)' };
+    return { fill: 'var(--oxblood)', text: 'var(--oxblood)' };
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+
+  function renderFeedback(ev) {
+    const c = scoreColors(ev.score);
+    $('feedback').innerHTML = `
+      <div class="fb-head">
+        <div class="fb-score" style="color:${c.text}">${ev.score}</div>
+        <div class="fb-out">out of 10</div>
+      </div>
+      <div class="fb-bar-track">
+        <div class="fb-bar-fill" style="width:${ev.score * 10}%; background:${c.fill}"></div>
+      </div>
+      <p class="fb-verdict">${esc(ev.verdict || '')}</p>
+
+      ${section('What worked', 'pos', ev.strengths)}
+      ${section('Shortcomings', 'neg', ev.shortcomings)}
+      ${section('How to improve', 'tip', ev.improvements)}
+
+      ${ev.structured_answer ? `
+        <div class="fb-section">
+          <div class="fb-section-title"><span class="marker" style="background:var(--ink-muted)"></span>Your answer, restructured</div>
+          <div class="structured-answer">${esc(ev.structured_answer)}</div>
+        </div>` : ''}
+
+      ${ev.ideal_answer ? `
+        <div class="fb-section">
+          <div class="fb-section-title pos"><span class="marker"></span>A 10/10 answer would sound like</div>
+          <div class="ideal-answer">${esc(ev.ideal_answer)}</div>
+        </div>` : ''}
+
+      <div class="actions">
+        <button id="next-q" class="btn btn-primary">Next question <span class="arrow">→</span></button>
+        <button id="end2" class="btn btn-ghost spacer-r">End session</button>
+      </div>
+    `;
+    show('feedback', true);
+    $('next-q').onclick = nextQuestion;
+    $('end2').onclick = endSession;
+  }
+
+  function section(title, cls, items) {
+    if (!items || !items.length) return '';
+    return `
+      <div class="fb-section">
+        <div class="fb-section-title ${cls}"><span class="marker"></span>${esc(title)}</div>
+        <ul class="fb-list">
+          ${items.map((s) => `<li>${esc(s)}</li>`).join('')}
+        </ul>
+      </div>`;
+  }
+
+  function setError(id, msg) {
+    const el = $(id);
+    if (!msg) { el.classList.add('hide'); el.textContent = ''; }
+    else { el.textContent = msg; el.classList.remove('hide'); }
+  }
+
+  function endSession() {
+    if (isRecording) stopRecording();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (state.history.length === 0) { show('interview', false); show('setup', true); return; }
+    const scores = state.history.map((h) => h.score);
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const best = Math.max(...scores);
+    const allShort = state.history.flatMap((h) => h.shortcomings || []);
+    const themes = dedupeThemes(allShort);
+
+    $('summary-style').textContent = state.style + ' · ' + state.diff;
+    $('summary-body').innerHTML = `
+      <div class="stats">
+        <div class="stat"><div class="stat-value">${avg.toFixed(1)}</div><div class="stat-label">Average</div></div>
+        <div class="stat"><div class="stat-value">${Math.round(best)}</div><div class="stat-label">Best</div></div>
+        <div class="stat"><div class="stat-value">${state.history.length}</div><div class="stat-label">Answered</div></div>
+      </div>
+      ${themes.length ? `
+        <div class="fb-section">
+          <div class="fb-section-title neg"><span class="marker"></span>Recurring shortcomings</div>
+          <ul class="fb-list">${themes.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+        </div>` : ''}
+      <div class="fb-section">
+        <div class="fb-section-title"><span class="marker" style="background:var(--ink-muted)"></span>Per-question scores</div>
+        <div>${state.history.map((h, i) => {
+          const c = scoreColors(h.score);
+          return `<div class="history-item">
+            <div class="history-head">
+              <div class="history-q">Q${i + 1}. ${esc(h.question)}</div>
+              <div class="history-score" style="color:${c.text}">${h.score}/10</div>
+            </div>
+          </div>`;
+        }).join('')}</div>
+      </div>
+    `;
+    show('interview', false);
+    show('summary', true);
+  }
+
+  function dedupeThemes(items) {
+    const seen = new Set();
+    const out = [];
+    for (const it of items) {
+      if (!it) continue;
+      const key = it.toLowerCase().split(/\s+/).slice(0, 4).join(' ');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(it);
+      if (out.length >= 4) break;
+    }
+    return out;
+  }
+
+  $('start').onclick = async () => {
+    const resume = $('resume').value.trim();
+    const jd = $('jd').value.trim();
+    const llmKey = $('llm-key').value.trim();
+    const deepgramKey = $('deepgram-key').value.trim();
+
+    if (resume.length < 50) { setError('setup-err', 'Please paste a fuller resume (at least a few lines).'); return; }
+    if (jd.length < 50) { setError('setup-err', 'Please paste a fuller job description.'); return; }
+    if (!llmKey) { setError('setup-err', 'An OpenAI or Anthropic (Claude) API key is required to generate and score questions.'); return; }
+    const provider = detectProvider(llmKey);
+    if (!provider) { setError('setup-err', "That doesn't look like a supported key. OpenAI keys start with 'sk-', Anthropic keys start with 'sk-ant-'."); return; }
+    setError('setup-err', '');
+
+    state.resume = resume;
+    state.jd = jd;
+    state.llmKey = llmKey;
+    state.provider = provider;
+    state.deepgramKey = deepgramKey;
+    state.engine = deepgramKey ? 'deepgram' : 'browser';
+    state.history = [];
+    state.qNum = 0;
+
+    if (state.engine === 'deepgram') {
+      $('engine-badge').textContent = 'Deepgram';
+      $('engine-badge').classList.remove('fallback');
+      show('voice-unsupported', false);
+    } else {
+      $('engine-badge').textContent = 'Browser STT';
+      $('engine-badge').classList.add('fallback');
+      if (!SpeechRec) {
+        $('voice-unsupported').textContent = "No Deepgram key, and your browser doesn't support speech recognition. Use 'Type your answer instead' below, or go back and add a Deepgram API key.";
+        show('voice-unsupported', true);
+        $('mic-btn').disabled = true;
+      }
+    }
+
+    show('setup', false);
+    show('interview', true);
+    await nextQuestion();
+  };
+
+  $('submit').onclick = async () => {
+    const a = getAnswerText();
+    if (a.length < 5) {
+      setError('answer-err', mode === 'voice'
+        ? 'Tap the mic and say your answer first — or hit Skip to pass.'
+        : 'Type your answer first — or hit Skip to pass.');
+      return;
+    }
+    await evaluateAnswer(a);
+  };
+
+  $('skip').onclick = async () => {
+    if (isRecording) stopRecording();
+    state.history.push({
+      question: state.currentQ, answer: '(skipped)',
+      score: 0, verdict: 'Skipped — no answer to evaluate.',
+      strengths: [], shortcomings: ['Did not attempt the question'],
+      improvements: ['Take a stab even when unsure — interviewers value thinking aloud over silence.'],
+      structured_answer: '',
+      ideal_answer: '',
+    });
+    await nextQuestion();
+  };
+
+  $('end').onclick = endSession;
+  $('restart').onclick = () => {
+    state.history = []; state.qNum = 0; state.currentQ = '';
+    show('summary', false); show('setup', true);
+  };
+})();
+</script>
+</body>
+</html>
